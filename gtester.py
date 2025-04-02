@@ -3,6 +3,7 @@ Module of basic tools for generating testing simple tasks.
 """
 
 from cProfile import Profile
+from copy import deepcopy
 from dataclasses import dataclass
 from itertools import combinations, permutations
 from pstats import SortKey, Stats
@@ -349,12 +350,15 @@ class GTester:
         with tqdm() as pbar:
             for iters, test_case in enumerate(arg_gen):
                 failed += 1
+                prev_test_case = deepcopy(test_case)
+
                 start = time.perf_counter()
                 res = self.func(test_case)
                 end = time.perf_counter()
+
                 res_time = end - start
                 str_time = f"{BColors.BOLD}TIME: {res_time} s{BColors.ENDC}"
-                test_case.possible_resulsts = [self.ufunc(test_case)]
+                test_case.possible_resulsts = [self.ufunc(prev_test_case)]
 
                 if res not in test_case.possible_resulsts:
                     print(
