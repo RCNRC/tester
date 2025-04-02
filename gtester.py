@@ -5,6 +5,7 @@ Module of basic tools for generating testing simple tasks.
 from cProfile import Profile
 from copy import deepcopy
 from dataclasses import dataclass
+import gc
 from itertools import combinations, permutations
 from pstats import SortKey, Stats
 from random import randint, seed, shuffle, choice
@@ -432,8 +433,6 @@ class GTester:
                     profile_result.strip_dirs().sort_stats(
                         SortKey.TIME, SortKey.CALLS
                     ).print_stats()
-
-                pbar.update(1)
 
 
 def simple_example():
