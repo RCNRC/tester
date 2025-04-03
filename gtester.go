@@ -200,10 +200,10 @@ func (gt *GTester) Generate1() TestCase {
 	return TestCase{args, nil}
 }
 
-func (gt *GTester) Test(amount int, timeLimit float64, printRight int, failOn int, dontCountAnswers []any) {
+func (gt *GTester) Test(amount int, timeLimit float64, printRight int, failOn int) {
 	failed := 0
 	for i := 0; i < amount; i++ {
-		rand.Seed(int64(i))
+		rand.New(rand.NewSource(int64(i)))
 		tc := gt.Generate1()
 		start := time.Now()
 		res := gt.testFunc(tc)
@@ -264,5 +264,5 @@ func simpleTest() {
 	}
 
 	tester := NewGTester(f, uf, []GT{B, A}, []GT{n, m, B, A})
-	tester.Test(10, 0.5, 1, 3, nil)
+	tester.Test(10, 0.5, 1, 3)
 }
