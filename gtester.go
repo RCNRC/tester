@@ -47,6 +47,17 @@ func (tc *TestCase) Check(answer any) bool {
 	return false
 }
 
+// TestFunc проверяет функцию на готовых примерах
+func TestFunc(tcs []TestCase, tFunc func(TestCase) any) {
+	for i, tc := range tcs {
+		res := tFunc(tc)
+		if !tc.Check(res) {
+			fmt.Printf("%s======== TEST #%d FAILED ========%s\nArgs: %v\nGot: %v\nExpected one of: %v\n",
+				BColors.Fail, i+1, BColors.End, tc.Args, res, tc.PossibleResults)
+		}
+	}
+}
+
 // GT интерфейс для генераторов тестовых данных
 type GT interface {
 	Generate()
