@@ -5,15 +5,12 @@ Module of basic tools for generating testing simple tasks.
 from cProfile import Profile
 from copy import deepcopy
 from dataclasses import dataclass
-import gc
 from itertools import combinations, permutations
 from pstats import SortKey, Stats
 from random import randint, seed, shuffle, choice
 from abc import ABCMeta, abstractmethod
 import time
 from typing import Any, Callable, Generator, List
-
-from tqdm import tqdm
 
 
 class BColors:
@@ -348,6 +345,8 @@ class GTester:
         failed = 0
         arg_gen = self.generate_n(amount)
 
+        from tqdm import tqdm
+
         with tqdm() as pbar:
             for iters, test_case in enumerate(arg_gen):
                 failed += 1
@@ -407,32 +406,47 @@ class GTester:
 
                 pbar.update(1)
 
-    def test_profile(self, amount: int, time_limit: float = 1.0):
+    def test_profile(
+        self, amount: int, time_limit: float = 1.0, print_right: int = False
+    ):
         """
         Testing function on TL error.
         """
 
         arg_gen = self.generate_n(amount)
 
-        with tqdm() as pbar:
-            for iters, test_case in enumerate(arg_gen):
-                with Profile() as profile:
-                    self.func(test_case)
-                    profile_result = Stats(profile)
+        for iters, test_case in enumerate(arg_gen):
+            profile = Profile()
+            profile.enable()
+            self.func(test_case)
+            profile.disable()
 
-                if profile_result.total_tt > time_limit:
+            profile_result = Stats(profile)
+
+            if profile_result.total_tt > time_limit:
+                print(
+                    f"\n{BColors.WARNING}=============TEST "
+                    f"{BColors.OKCYAN}#{iters}{BColors.WARNING}"
+                    f" TIME LIMIT EXCEEDED============={BColors.ENDC}\n"
+                    f"Total {BColors.WARNING}{profile_result.total_tt}"
+                    f"{BColors.ENDC} more than "
+                    f"{BColors.OKGREEN}{time_limit}{BColors.ENDC}"
+                    f"{BColors.ENDC}"
+                )
+                profile_result.strip_dirs().sort_stats(
+                    SortKey.TIME, SortKey.CALLS
+                ).print_stats()
+                profile_result.sort_stats(
+                    SortKey.TIME, SortKey.CALLS
+                ).print_callers()
+            else:
+                if print_right:
                     print(
-                        f"\n{BColors.WARNING}=============TEST "
-                        f"{BColors.OKCYAN}#{iters}{BColors.WARNING}"
-                        f" TIME LIMIT EXCEEDED============={BColors.ENDC}\n"
-                        f"Total {BColors.WARNING}{profile_result.total_tt}"
-                        f"{BColors.ENDC} more than "
-                        f"{BColors.OKGREEN}{time_limit}{BColors.ENDC}"
+                        f"\n{BColors.OKGREEN}=============TEST "
+                        f"{BColors.OKBLUE}#{iters}{BColors.OKGREEN}"
+                        f" PASSED=============\n{profile_result.total_tt}"
                         f"{BColors.ENDC}"
                     )
-                    profile_result.strip_dirs().sort_stats(
-                        SortKey.TIME, SortKey.CALLS
-                    ).print_stats()
 
 
 def simple_example():

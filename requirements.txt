@@ -1,2 +1,3 @@
 tqdm
 numpy
+line_profiler
