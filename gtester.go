@@ -32,12 +32,12 @@ var BColors = struct {
 
 // TestCase представляет тестовый случай
 type TestCase struct {
-	Args            []interface{}
-	PossibleResults []interface{}
+	Args            []any
+	PossibleResults []any
 }
 
 // Check проверяет наличие ответа в возможных результатах
-func (tc *TestCase) Check(answer interface{}) bool {
+func (tc *TestCase) Check(answer any) bool {
 	for _, res := range tc.PossibleResults {
 		if reflect.DeepEqual(answer, res) {
 			return true
@@ -49,16 +49,16 @@ func (tc *TestCase) Check(answer interface{}) bool {
 // GT интерфейс для генераторов тестовых данных
 type GT interface {
 	Generate()
-	Val() interface{}
+	Val() any
 }
 
 // GStatic обертка для статических значений
 type GStatic struct {
-	value interface{}
+	value any
 }
 
-func (g *GStatic) Generate()        {}
-func (g *GStatic) Val() interface{} { return g.value }
+func (g *GStatic) Generate() {}
+func (g *GStatic) Val() any  { return g.value }
 
 // GInt генератор целых чисел
 type GInt struct {
@@ -77,7 +77,7 @@ func (g *GInt) Generate() {
 	g.val = rand.Intn(maxVal-minVal+1) + minVal
 }
 
-func (g *GInt) Val() interface{} { return g.val }
+func (g *GInt) Val() any { return g.val }
 
 // GUInt генератор положительных целых чисел
 type GUInt struct{ *GInt }
@@ -90,17 +90,17 @@ func NewGUInt(max GT) *GUInt {
 type GList struct {
 	elementType GT
 	amount      GT
-	listFunc    func([]interface{}) interface{}
-	val         interface{}
+	listFunc    func([]any) any
+	val         any
 }
 
-func NewGList(elementType GT, amount GT, listFunc func([]interface{}) interface{}) *GList {
+func NewGList(elementType GT, amount GT, listFunc func([]any) any) *GList {
 	return &GList{elementType, amount, listFunc, nil}
 }
 
 func (g *GList) Generate() {
 	amount := g.amount.Val().(int)
-	elements := make([]interface{}, amount)
+	elements := make([]any, amount)
 	for i := 0; i < amount; i++ {
 		g.elementType.Generate()
 		elements[i] = g.elementType.Val()
@@ -111,12 +111,12 @@ func (g *GList) Generate() {
 	g.val = g.listFunc(elements)
 }
 
-func (g *GList) Val() interface{} { return g.val }
+func (g *GList) Val() any { return g.val }
 
 // GTuple генератор кортежей
 type GTuple struct {
 	elements []GT
-	val      []interface{}
+	val      []any
 }
 
 func NewGTuple(elements []GT) *GTuple {
@@ -124,14 +124,14 @@ func NewGTuple(elements []GT) *GTuple {
 }
 
 func (g *GTuple) Generate() {
-	g.val = make([]interface{}, len(g.elements))
+	g.val = make([]any, len(g.elements))
 	for i, e := range g.elements {
 		e.Generate()
 		g.val[i] = e.Val()
 	}
 }
 
-func (g *GTuple) Val() interface{} { return g.val }
+func (g *GTuple) Val() any { return g.val }
 
 // GChar генератор символов
 type GChar struct {
@@ -147,7 +147,7 @@ func (g *GChar) Generate() {
 	g.val = rune(g.chars[rand.Intn(len(g.chars))])
 }
 
-func (g *GChar) Val() interface{} { return string(g.val) }
+func (g *GChar) Val() any { return string(g.val) }
 
 // GFrozStr генератор перемешанных строк
 type GFrozStr struct {
@@ -167,19 +167,19 @@ func (g *GFrozStr) Generate() {
 	g.val = string(runes)
 }
 
-func (g *GFrozStr) Val() interface{} { return g.val }
+func (g *GFrozStr) Val() any { return g.val }
 
 // GTester менеджер тестирования
 type GTester struct {
-	testFunc      func(TestCase) interface{}
-	universalFunc func(TestCase) interface{}
+	testFunc      func(TestCase) any
+	universalFunc func(TestCase) any
 	funcArgs      []GT
 	allArgs       []GT
 }
 
 func NewGTester(
-	testFunc func(TestCase) interface{},
-	universalFunc func(TestCase) interface{},
+	testFunc func(TestCase) any,
+	universalFunc func(TestCase) any,
 	funcArgs []GT,
 	allArgs []GT,
 ) *GTester {
@@ -190,14 +190,14 @@ func (gt *GTester) Generate1() TestCase {
 	for _, arg := range gt.allArgs {
 		arg.Generate()
 	}
-	args := make([]interface{}, len(gt.funcArgs))
+	args := make([]any, len(gt.funcArgs))
 	for i, arg := range gt.funcArgs {
 		args[i] = arg.Val()
 	}
 	return TestCase{args, nil}
 }
 
-func (gt *GTester) Test(amount int, timeLimit float64, printRight int, failOn int, dontCountAnswers []interface{}) {
+func (gt *GTester) Test(amount int, timeLimit float64, printRight int, failOn int, dontCountAnswers []any) {
 	failed := 0
 	for i := 0; i < amount; i++ {
 		rand.Seed(int64(i))
@@ -207,7 +207,7 @@ func (gt *GTester) Test(amount int, timeLimit float64, printRight int, failOn in
 		duration := time.Since(start).Seconds()
 
 		expected := gt.universalFunc(tc)
-		tc.PossibleResults = []interface{}{expected}
+		tc.PossibleResults = []any{expected}
 
 		if !tc.Check(res) {
 			fmt.Printf("%s======== TEST #%d FAILED ========%s\nArgs: %v\nGot: %v\nExpected: %v\nTime: %.3fs\n",
@@ -236,11 +236,11 @@ func simpleTest() {
 	n := NewGUInt(&GStatic{10})
 	m := NewGInt(&GStatic{-10}, &GStatic{10})
 	B := NewGTuple([]GT{n, m})
-	A := NewGList(m, n, func(e []interface{}) interface{} { return e })
+	A := NewGList(m, n, func(e []any) any { return e })
 
-	f := func(tc TestCase) interface{} {
-		// b := tc.Args[0].([]interface{})
-		x := tc.Args[1].([]interface{})
+	f := func(tc TestCase) any {
+		// b := tc.Args[0].([]any)
+		x := tc.Args[1].([]any)
 		res := 0
 		for _, v := range x {
 			num := v.(int)
@@ -251,8 +251,8 @@ func simpleTest() {
 		return res
 	}
 
-	uf := func(tc TestCase) interface{} {
-		x := tc.Args[1].([]interface{})
+	uf := func(tc TestCase) any {
+		x := tc.Args[1].([]any)
 		sum := 0
 		for _, v := range x {
 			sum += v.(int)
