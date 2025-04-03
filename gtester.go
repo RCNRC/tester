@@ -1,4 +1,4 @@
-package gtester
+package tester
 
 import (
 	"fmt"
