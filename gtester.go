@@ -54,11 +54,11 @@ type GT interface {
 
 // GStatic обертка для статических значений
 type GStatic struct {
-	value any
+	Value any
 }
 
 func (g *GStatic) Generate() {}
-func (g *GStatic) Val() any  { return g.value }
+func (g *GStatic) Val() any  { return g.Value }
 
 // GInt генератор целых чисел
 type GInt struct {
