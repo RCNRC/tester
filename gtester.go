@@ -175,22 +175,22 @@ func (g *GFrozStr) Val() any { return g.val }
 
 // GStr генератор строки
 type GStr struct {
-	base   string
+	gChar  GChar
 	length GT
 	delim  string
 	val    string
 }
 
-func NewGStr(base string, length GT, delim string) *GStr {
-	return &GStr{base, length, delim, ""}
+func NewGStr(gChar GChar, length GT, delim string) *GStr {
+	return &GStr{gChar, length, delim, ""}
 }
 
 func (g *GStr) Generate() {
-	runes := []rune(g.base)
 	lenght := g.length.Val().(int)
 	newChars := make([]string, lenght)
 	for i := 0; i < lenght; i++ {
-		newChars[i] = string(runes[rand.Intn(len(runes))])
+		g.gChar.Generate()
+		newChars[i] = g.Val().(string)
 	}
 	g.val = strings.Join(newChars, g.delim)
 }
