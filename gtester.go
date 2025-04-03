@@ -259,6 +259,24 @@ func (gt *GTester) Test(amount int, timeLimit float64, printRight int, failOn in
 	}
 }
 
+func (gt *GTester) TestProfile(amount int, timeLimit float64, printRight int) {
+	for i := 0; i < amount; i++ {
+		rand.New(rand.NewSource(int64(i)))
+		tc := gt.Generate1()
+		start := time.Now()
+		gt.testFunc(tc)
+		duration := time.Since(start).Seconds()
+
+		if duration > timeLimit {
+			fmt.Printf("%s====== TEST #%d TIMEOUT ======%s\nTime: %.3fs (limit %.3fs)\n",
+				BColors.Warning, i+1, BColors.End, duration, timeLimit)
+		} else if printRight > 0 {
+			fmt.Printf("%s======== TEST #%d PASSED ========%s\nTime: %.3fs\n",
+				BColors.OKGreen, i+1, BColors.End, duration)
+		}
+	}
+}
+
 // Пример использования
 func simpleTest() {
 	n := NewGUInt(NewGStatic(10))
