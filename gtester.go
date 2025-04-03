@@ -97,7 +97,7 @@ type GList struct {
 	val         []any
 }
 
-func NewGList(elementType GT, amount GT, listFunc func([]any) any) *GList {
+func NewGList(elementType GT, amount GT) *GList {
 	return &GList{elementType, amount, []any{}}
 }
 
@@ -239,7 +239,7 @@ func simpleTest() {
 	n := NewGUInt(NewGStatic(10))
 	m := NewGInt(NewGStatic(-10), NewGStatic(10))
 	B := NewGTuple([]GT{n, m})
-	A := NewGList(m, n, func(e []any) any { return e })
+	A := NewGList(m, n)
 
 	f := func(tc TestCase) any {
 		// b := tc.Args[0].([]any)
