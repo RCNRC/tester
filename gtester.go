@@ -54,11 +54,15 @@ type GT interface {
 
 // GStatic обертка для статических значений
 type GStatic struct {
-	Value any
+	value any
 }
 
 func (g *GStatic) Generate() {}
-func (g *GStatic) Val() any  { return g.Value }
+func (g *GStatic) Val() any  { return g.value }
+
+func NewGStatic(value any) *GStatic {
+	return &GStatic{value: value}
+}
 
 // GInt генератор целых чисел
 type GInt struct {
@@ -90,17 +94,16 @@ func NewGUInt(max GT) *GUInt {
 type GList struct {
 	elementType GT
 	amount      GT
-	listFunc    func([]any) any
-	val         any
+	val         []any
 }
 
 func NewGList(elementType GT, amount GT, listFunc func([]any) any) *GList {
-	return &GList{elementType, amount, listFunc, nil}
+	return &GList{elementType, amount, []any{}}
 }
 
 func (g *GList) Generate() {
 	amount := g.amount.Val().(int)
-	elements := make([]any, amount)
+	var elements []any = make([]any, amount)
 	for i := 0; i < amount; i++ {
 		g.elementType.Generate()
 		elements[i] = g.elementType.Val()
@@ -108,7 +111,7 @@ func (g *GList) Generate() {
 	rand.Shuffle(len(elements), func(i, j int) {
 		elements[i], elements[j] = elements[j], elements[i]
 	})
-	g.val = g.listFunc(elements)
+	g.val = elements
 }
 
 func (g *GList) Val() any { return g.val }
@@ -233,8 +236,8 @@ func (gt *GTester) Test(amount int, timeLimit float64, printRight int, failOn in
 
 // Пример использования
 func simpleTest() {
-	n := NewGUInt(&GStatic{10})
-	m := NewGInt(&GStatic{-10}, &GStatic{10})
+	n := NewGUInt(NewGStatic(10))
+	m := NewGInt(NewGStatic(-10), NewGStatic(10))
 	B := NewGTuple([]GT{n, m})
 	A := NewGList(m, n, func(e []any) any { return e })
 
