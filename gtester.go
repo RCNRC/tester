@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -171,6 +172,30 @@ func (g *GFrozStr) Generate() {
 }
 
 func (g *GFrozStr) Val() any { return g.val }
+
+// GStr генератор строки
+type GStr struct {
+	base   string
+	length GT
+	delim  string
+	val    string
+}
+
+func NewGStr(base string, length GT, delim string) *GStr {
+	return &GStr{base, length, delim, ""}
+}
+
+func (g *GStr) Generate() {
+	runes := []rune(g.base)
+	lenght := g.length.Val().(int)
+	newChars := make([]string, lenght)
+	for i := 0; i < lenght; i++ {
+		newChars[i] = string(runes[rand.Intn(len(runes))])
+	}
+	g.val = strings.Join(newChars, g.delim)
+}
+
+func (g *GStr) Val() any { return g.val }
 
 // GTester менеджер тестирования
 type GTester struct {
