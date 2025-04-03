@@ -190,7 +190,7 @@ func (g *GStr) Generate() {
 	newChars := make([]string, lenght)
 	for i := 0; i < lenght; i++ {
 		g.gChar.Generate()
-		newChars[i] = g.Val().(string)
+		newChars[i] = g.gChar.Val().(string)
 	}
 	g.val = strings.Join(newChars, g.delim)
 }
