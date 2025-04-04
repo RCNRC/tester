@@ -47,8 +47,8 @@ func (tc *TestCase) Check(answer any) bool {
 	return false
 }
 
-// TestFunc проверяет функцию на готовых примерах
-func TestFunc(tcs []TestCase, tFunc func(TestCase) any) {
+// CheckFunc проверяет функцию на готовых примерах
+func CheckFunc(tcs []TestCase, tFunc func(TestCase) any) {
 	for i, tc := range tcs {
 		res := tFunc(tc)
 		if !tc.Check(res) {
@@ -286,37 +286,4 @@ func (gt *GTester) TestProfile(amount int, timeLimit float64, printRight int) {
 				BColors.OKGreen, i+1, BColors.End, duration)
 		}
 	}
-}
-
-// Пример использования
-func simpleTest() {
-	n := NewGUInt(NewGStatic(10))
-	m := NewGInt(NewGStatic(-10), NewGStatic(10))
-	B := NewGTuple([]GT{n, m})
-	A := NewGList(m, n)
-
-	f := func(tc TestCase) any {
-		// b := tc.Args[0].([]any)
-		x := tc.Args[1].([]any)
-		res := 0
-		for _, v := range x {
-			num := v.(int)
-			if num != 2 { // Логическая ошибка из примера
-				res += num
-			}
-		}
-		return res
-	}
-
-	uf := func(tc TestCase) any {
-		x := tc.Args[1].([]any)
-		sum := 0
-		for _, v := range x {
-			sum += v.(int)
-		}
-		return sum
-	}
-
-	tester := NewGTester(f, uf, []GT{B, A}, []GT{n, m, B, A})
-	tester.Test(10, 0.5, 1, 3)
 }
