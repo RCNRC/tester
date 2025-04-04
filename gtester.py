@@ -172,6 +172,36 @@ class GFrozStr(GT):
         return self.val
 
 
+class GString(GT):
+    """
+    Generates a GT-length string from given characters.
+    """
+
+    def __init__(self, available_chars: str, length: int | GT) -> None:
+        self.al = available_chars
+        self.length = length
+        self.__val = None
+
+    @property
+    def val(self):
+        if self.__val is None:
+            self.__val = self.generate()
+
+        return self.__val
+
+    @val.setter
+    def val(self, value):
+        self.__val = value
+
+    def generate(self):
+        length = (
+            self.length.val if isinstance(self.length, GT) else self.length
+        )
+        self.val = "".join(choice(self.al) for _ in range(length))
+
+        return self.val
+
+
 class GInt(GT):
     """
     Generates int from / up to int or another GInt.
@@ -345,66 +375,66 @@ class GTester:
         failed = 0
         arg_gen = self.generate_n(amount)
 
-        from tqdm import tqdm
+        # from tqdm import tqdm
 
-        with tqdm() as pbar:
-            for iters, test_case in enumerate(arg_gen):
-                failed += 1
-                prev_test_case = deepcopy(test_case)
+        # with tqdm() as pbar:
+        for iters, test_case in enumerate(arg_gen):
+            failed += 1
+            prev_test_case = deepcopy(test_case)
 
-                start = time.perf_counter()
-                res = self.func(test_case)
-                end = time.perf_counter()
+            start = time.perf_counter()
+            res = self.func(test_case)
+            end = time.perf_counter()
 
-                res_time = end - start
-                str_time = f"{BColors.BOLD}TIME: {res_time} s{BColors.ENDC}"
-                test_case.possible_resulsts = [self.ufunc(prev_test_case)]
+            res_time = end - start
+            str_time = f"{BColors.BOLD}TIME: {res_time} s{BColors.ENDC}"
+            test_case.possible_resulsts = [self.ufunc(prev_test_case)]
 
-                if res not in test_case.possible_resulsts:
+            if res not in test_case.possible_resulsts:
+                print(
+                    f"\n{BColors.FAIL}=============TEST "
+                    f"{BColors.OKCYAN}#{iters}{BColors.FAIL}"
+                    f" FAILED=============\nArguments: {test_case}"
+                    f"\n{str_time}{BColors.ENDC}\n"
+                    f"EXPECT:\t{test_case.possible_resulsts}\nGOT:\t{res}"
+                    f"{BColors.ENDC}"
+                )
+            elif res_time > time_limit:
+                print(
+                    f"\n{BColors.WARNING}=============TEST "
+                    f"{BColors.OKCYAN}#{iters}{BColors.WARNING}"
+                    f" TIME LIMIT EXCEEDED=============\n"
+                    f"{BColors.OKGREEN}Answer is right\n{BColors.WARNING}"
+                    f"Arguments: {test_case}"
+                    f"\n{str_time}{BColors.ENDC}\n"
+                    f"EXPECT:\t{test_case.possible_resulsts}\nGOT:\t{res}"
+                    f"{BColors.ENDC}"
+                )
+            elif res in test_case.possible_resulsts:
+                failed -= 1
+
+                if res in dont_count_answers:
+                    continue
+
+                if print_right:
                     print(
-                        f"\n{BColors.FAIL}=============TEST "
-                        f"{BColors.OKCYAN}#{iters}{BColors.FAIL}"
-                        f" FAILED=============\nArguments: {test_case}"
-                        f"\n{str_time}{BColors.ENDC}\n"
-                        f"EXPECT:\t{test_case.possible_resulsts}\nGOT:\t{res}"
-                        f"{BColors.ENDC}"
-                    )
-                elif res_time > time_limit:
-                    print(
-                        f"\n{BColors.WARNING}=============TEST "
-                        f"{BColors.OKCYAN}#{iters}{BColors.WARNING}"
-                        f" TIME LIMIT EXCEEDED=============\n"
-                        f"{BColors.OKGREEN}Answer is right\n{BColors.WARNING}"
-                        f"Arguments: {test_case}"
-                        f"\n{str_time}{BColors.ENDC}\n"
-                        f"EXPECT:\t{test_case.possible_resulsts}\nGOT:\t{res}"
-                        f"{BColors.ENDC}"
-                    )
-                elif res in test_case.possible_resulsts:
-                    failed -= 1
-
-                    if res in dont_count_answers:
-                        continue
-
-                    if print_right:
-                        print(
-                            f"\n{BColors.OKGREEN}=============TEST "
-                            f"{BColors.OKBLUE}#{iters}{BColors.OKGREEN}"
-                            f" PASSED=============\n{str_time}{BColors.ENDC}"
-                        )
-
-                        if print_right == 2:
-                            print(f"Arguments: {test_case}\nGOT:\t{res}")
-
-                if fail_on is not None and failed >= fail_on:
-                    print(
-                        f"\n{BColors.FAIL}=============TOTAL {failed}"
-                        f" FAILS EXCEEDED============={BColors.ENDC}"
+                        f"\n{BColors.OKGREEN}=============TEST "
+                        f"{BColors.OKBLUE}#{iters}{BColors.OKGREEN}"
+                        f" PASSED=============\n{str_time}{BColors.ENDC}"
                     )
 
-                    return
+                    if print_right == 2:
+                        print(f"Arguments: {test_case}\nGOT:\t{res}")
 
-                pbar.update(1)
+            if fail_on is not None and failed >= fail_on:
+                print(
+                    f"\n{BColors.FAIL}=============TOTAL {failed}"
+                    f" FAILS EXCEEDED============={BColors.ENDC}"
+                )
+
+                return
+
+                # pbar.update(1)
 
     def test_profile(
         self, amount: int, time_limit: float = 1.0, print_right: int = False
