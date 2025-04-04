@@ -54,7 +54,7 @@ func TestReadLine(t *testing.T) {
 
 	in := bufio.NewReader(os.Stdin)
 	for _, curCase := range cases {
-		n := readLine(in)
+		n := ReadLine(in)
 		assert.Equal(t, curCase, n)
 	}
 }
@@ -85,7 +85,7 @@ func TestReadLineNumbs(t *testing.T) {
 
 	in := bufio.NewReader(os.Stdin)
 	for _, curCase := range cases {
-		n := readLineNumbs(in)
+		n := ReadLineNumbs(in)
 		assert.Equal(t, strings.Split(curCase, " "), n)
 	}
 }
@@ -113,7 +113,7 @@ func TestReadInt(t *testing.T) {
 
 	in := bufio.NewReader(os.Stdin)
 	for _, curCase := range cases {
-		n := readInt(in)
+		n := ReadInt(in)
 		assert.Equal(t, curCase, n)
 	}
 }
@@ -149,7 +149,7 @@ func TestReadArrInt(t *testing.T) {
 
 	in := bufio.NewReader(os.Stdin)
 	for _, curCase := range cases {
-		n := readArrInt(in)
+		n := ReadArrInt(in)
 		assert.ElementsMatch(t, curCase, n)
 	}
 }
@@ -185,7 +185,7 @@ func TestReadArrInt64(t *testing.T) {
 
 	in := bufio.NewReader(os.Stdin)
 	for _, curCase := range cases {
-		n := readArrInt64(in)
+		n := ReadArrInt64(in)
 		assert.ElementsMatch(t, curCase, n)
 	}
 }
