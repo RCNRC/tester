@@ -287,3 +287,12 @@ func (gt *GTester) TestProfile(amount int, timeLimit float64, printRight int) {
 		}
 	}
 }
+
+// Helps to fill Args in TestCase
+func ToAnySlice[T any](s []T) []any {
+	result := make([]any, len(s))
+	for i, v := range s {
+		result[i] = v
+	}
+	return result
+}
